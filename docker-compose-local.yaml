@@ -13,8 +13,6 @@ services:
       - app-network
   frontend:
     image: homepage_frontend_dev
-    ports:
-      - "80:80"
     networks:
       - app-network
     depends_on:
@@ -22,10 +20,6 @@ services:
 
   backend:
     image: homepage_backend_dev
-    ports:
-      - "8080:8080"
-    expose:
-      - "8080"
     networks:
       - app-network
     environment:
