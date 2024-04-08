@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  frontend:
+    image: homepage_frontend_dev
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  backend:
+    image: homepage_backend_dev
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=twitchplays
+      - MYSQL_DB_USERNAME=backend_db_client
+      - MYSQL_DB_PASSWORD=proneraggedyplanetgallows
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=proneraggedyplanetgallows
+      - MYSQL_ROOT_HOST='%'
+      - MYSQL_DATABASE=twitchplays
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MYSQL_USER=backend_db_client
+      - MYSQL_PASSWORD=proneraggedyplanetgallows
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:
