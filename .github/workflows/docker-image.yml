@@ -12,12 +12,15 @@ jobs:
     steps:
     - name: Checkout project sources
       uses: actions/checkout@v4
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
     - name: Run build with Gradle Wrapper
       run: ./gradlew build
   
   build-docker-image:
+    needs: [build-gradle-project]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
