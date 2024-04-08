@@ -15,14 +15,8 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
     - name: Install Dependencies
-      run: :/gradlew install
+      run: ./gradlew install
     - name: Run build with Gradle Wrapper
       run: ./gradlew build
-  
-  build-docker-image:
-    needs: [build-gradle-project]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag homepage_backend_app:$(date +%s)
