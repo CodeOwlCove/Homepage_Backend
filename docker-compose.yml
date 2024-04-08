@@ -1,16 +1,18 @@
 version: '3.8'
 services:
   frontend:
-    image: homepage_frontend_dev
+    image: ghcr.io/codeowlcove/homepage_frontend:main
     ports:
       - "80:80"
     networks:
       - app-network
     depends_on:
       - backend
+    environment:
+      - VITE_BACKEND_URL=http://backend:8080
 
   backend:
-    image: homepage_backend_dev
+    image: ghcr.io/codeowlcove/homepage_backend:main
     ports:
       - "8080:8080"
     networks:
