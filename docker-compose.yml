@@ -14,10 +14,11 @@ services:
   backend:
     image: ghcr.io/codeowlcove/homepage_backend:main
     ports:
-      - "8080:8080"
+      - "8443:8443"
     networks:
       - app-network
     environment:
+      - BACKEND_PORT=8443
       - MYSQL_HOST=db
       - MYSQL_DATABASE=twitchplays
       - MYSQL_DB_USERNAME=backend_db_client
