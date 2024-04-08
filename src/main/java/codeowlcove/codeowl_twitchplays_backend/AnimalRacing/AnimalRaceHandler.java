@@ -32,6 +32,9 @@ public class AnimalRaceHandler {
     private int animalSpeed = 200;
 
     private ArrayList<Integer> placementList = new ArrayList<>();
+    private ArrayList<Integer> lastPlacementList = new ArrayList<>();
+
+    private boolean isGamePayedOut = false;
 
     Runnable handleGameloop = new Runnable() {
         @Override
@@ -55,7 +58,6 @@ public class AnimalRaceHandler {
         this.animalRaceBets = animalRaceBets;
 
         CreateRaceAnimals(ANIMALS_AMOUNT);
-        placementList = new ArrayList<>();
 
         timeUntilNextGameState = betTime;
         executorService.scheduleAtFixedRate(handleGameloop, 0, (long) gameLoopTickTime, TimeUnit.MILLISECONDS);
@@ -77,11 +79,16 @@ public class AnimalRaceHandler {
     }
 
     private void HandleFinishedTick(){
+        if(!isGamePayedOut && timeUntilNextGameState <= betTime/2) {
+            isGamePayedOut = true;
+            animalRaceBets.PayoutBets(lastPlacementList);
+        }
+
         if(timeUntilNextGameState <= 0){
-            animalRaceBets.PayoutBets(placementList.get(0));
             ResetRace();
             currentGameState = AnimalRaceGameState.BETTING;
             timeUntilNextGameState = betTime;
+            isGamePayedOut = false;
         }
     }
 
@@ -124,11 +131,17 @@ public class AnimalRaceHandler {
         timeUntilNextGameState = resetTime;
 
         logger.info("Placement: " + placementList.toString());
+        ResetPlacementList();
+    }
+
+    public void ResetPlacementList(){
+        lastPlacementList = new ArrayList<>();
+        lastPlacementList.addAll(placementList);
+
+        placementList = new ArrayList<>();
     }
 
     public void ResetRace(){
-        placementList = new ArrayList<>();
-
         for(Animal animal : animals){
             animal.setProgress(0);
             animal.setState(AnimalState.IDLE);
@@ -140,8 +153,31 @@ public class AnimalRaceHandler {
             animal.setState(AnimalState.RUNNING);
     }
 
-    public AnimalRaceGameState getCurrentGameState() {
-        return currentGameState;
+
+    /**
+     * Get the current game state and the time until the next game state
+     * @return String[] {GameState, TimeUntilNextGameState}
+     */
+    public String[] getCurrentGameState() {
+        String[] result = new String[2];
+        result[0] = currentGameState.toString();
+        result[1] = String.valueOf(GetRemainingStateTime());
+        return result;
+    }
+
+    public int GetRemainingStateTime(){
+        return switch (currentGameState) {
+            case BETTING, FINISHED -> (int) timeUntilNextGameState;
+            case RACING -> -1;
+        };
+    }
+
+    public String[] GetLastWinners(){
+        String[] winners = new String[lastPlacementList.size()];
+        for(int i = 0; i < lastPlacementList.size(); i++){
+            winners[i] = animals.get(lastPlacementList.get(i)).getName();
+        }
+        return winners;
     }
 
 }

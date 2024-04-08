@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,9 +43,30 @@ public class AnimalRaceBets {
     }
 }
 
-    private static final Logger logger = LoggerFactory.getLogger(AnimalRaceHandler.class);
+    public class Payout {
+        public String animalName;
+        public String betPoints;
+        public int payedOutPoints;
+        public float payedOutPointsMultiplier;
 
+        public Payout(String animalName, String betPoints, float payedOutPointsMultiplier) {
+            this.animalName = animalName;
+            this.betPoints = betPoints;
+            this.payedOutPoints = (int) (Float.parseFloat(betPoints) * payedOutPointsMultiplier);
+            this.payedOutPointsMultiplier = payedOutPointsMultiplier;
+        }
+
+        @Override
+        public String toString() {
+            return "{'animalName': " + this.animalName + " }, 'betPoints' : " + this.betPoints + "}, 'payedOutPoints' : " + this.payedOutPoints + " , 'payedOutPointsMultiplier' : " + this.payedOutPointsMultiplier + "'}";
+        }
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(AnimalRaceHandler.class);
     private HashMap<String, Bet> bets = new HashMap<>();
+    private HashMap<String, Payout> lastSuccessfullyPlacedBets = new HashMap<>();
+    private HashMap<String, Payout> lastFailedPlacedBets = new HashMap<>();
+    private final float[] payoutMultipliers = {2, 1.5f, 1};
     private DatabaseHandler databaseHandler;
 
     public AnimalRaceBets(SQLDatabaseHandler databaseHandler){
@@ -83,15 +105,31 @@ public class AnimalRaceBets {
         bets.clear();
     }
 
-    public void PayoutBets(Integer winner){
-        logger.info(" --- Payout for winner " + winner);
+    public void PayoutBets(ArrayList<Integer> winnerList){
+        logger.info(" --- Payout " + payoutMultipliers.toString() + " for winners " + winnerList);
+
+        lastSuccessfullyPlacedBets.clear();
+        lastFailedPlacedBets.clear();
+
         for(Map.Entry<String, Bet> entry : bets.entrySet()){
-            if(entry.getValue().animalId == winner){
-                logger.info(" --- Payout for user " + entry.getKey() + " with bet on " + entry.getValue().animalName + " for " + entry.getValue().betAmount * 2 + " points");
-                databaseHandler.AddPoints(entry.getKey(), entry.getValue().betAmount * 2);
+            var userWon = false;
+            for(int i = 0; i < payoutMultipliers.length; i++){
+                if(i >= winnerList.size())
+                    break;
+                if(entry.getValue().animalId == winnerList.get(i)){
+                    databaseHandler.AddPoints(entry.getKey(), (int) (entry.getValue().betAmount * payoutMultipliers[i]));
+                    lastSuccessfullyPlacedBets.put(entry.getKey(), new Payout(entry.getValue().animalName, String.valueOf(entry.getValue().betAmount), payoutMultipliers[i]));
+                    userWon = true;
+                    break;
+                }
+            }
+            if(!userWon){
+                lastFailedPlacedBets.put(entry.getKey(), new Payout(entry.getValue().animalName, String.valueOf(entry.getValue().betAmount), 0));
             }
         }
         clearBets();
+        System.out.println(" --- Payouts: " + lastSuccessfullyPlacedBets.toString());
+        System.out.println(" --- Failed Payouts: " + lastFailedPlacedBets.toString());
     }
 
 
