@@ -1,0 +1,11 @@
+{
+  email codeowlcove@gmail.com
+}
+
+codeowlcove.com {
+  reverse_proxy frontend:80
+}
+
+backend.codeowlcove.com {
+  reverse_proxy backend:8080
+}
