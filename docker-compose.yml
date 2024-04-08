@@ -7,26 +7,22 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - caddy-data:/data
+      - caddy-config:/config
     networks:
       - app-network
 
   frontend:
     image: ghcr.io/codeowlcove/homepage_frontend:main
-    ports:
-      - "80:80"
     networks:
       - app-network
     depends_on:
       - backend
     environment:
-      - VITE_BACKEND_URL=http://backend:8080
+      - VITE_BACKEND_URL=https://backend.codeowlcove.com
 
   backend:
     image: ghcr.io/codeowlcove/homepage_backend:main
-    ports:
-      - "8080:8080"
     expose:
       - "8080"
     networks:
@@ -65,3 +61,5 @@ networks:
 
 volumes:
   db-data:
+  caddy-data:
+  caddy-config:

@@ -7,8 +7,8 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - caddy-data:/data
+      - caddy-config:/config
     networks:
       - app-network
   frontend:
@@ -56,3 +56,5 @@ networks:
 
 volumes:
   db-data:
+  caddy_data:
+  caddy_config:
