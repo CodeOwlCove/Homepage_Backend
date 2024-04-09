@@ -3,6 +3,9 @@
 }
 
 codeowlcove.com {
+  root * /usr/share/nginx/html
+  file_server
+  try_files {path} /index.html
   reverse_proxy frontend:80
 }
 
