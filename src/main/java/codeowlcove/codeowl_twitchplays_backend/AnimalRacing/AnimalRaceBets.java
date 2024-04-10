@@ -73,6 +73,10 @@ public class AnimalRaceBets {
         this.databaseHandler = databaseHandler;
     }
 
+    public HashMap<String, Bet> getBets() {
+        return bets;
+    }
+
     public String GetCurrentBets(){
         var objectMapper = new ObjectMapper();
         try {

@@ -4,6 +4,7 @@ import codeowlcove.codeowl_twitchplays_backend.AnimalRacing.AnimalRaceHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 public class AnimaRacingController {
@@ -30,6 +31,24 @@ public class AnimaRacingController {
     @GetMapping("/getLastWinners")
     public ResponseEntity<String[]> getLastWinners() {
         return ResponseEntity.ok(animalRaceHandler.GetLastWinners());
+    }
+
+    @GetMapping("/getAnimalRaceInformation")
+    public SseEmitter getAnimalRaceInformation() {
+        SseEmitter emitter = new SseEmitter();
+
+        new Thread(() -> {
+            try{
+                while(true){
+                    emitter.send(animalRaceHandler.GetAnimalRaceInformation());
+                    Thread.sleep((int) animalRaceHandler.getTickTime());
+                }
+            } catch (Exception e){
+                emitter.completeWithError(e);
+            }
+        }).start();
+
+        return emitter;
     }
 
 }

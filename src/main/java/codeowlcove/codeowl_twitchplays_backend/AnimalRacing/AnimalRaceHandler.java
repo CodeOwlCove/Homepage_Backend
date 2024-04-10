@@ -14,6 +14,27 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class AnimalRaceHandler {
 
+    /**
+     * Class Object to repsresent the current state of a race (for transport purposes)
+     */
+    private static class AnimalRaceInformation{
+        public List<Animal> animals = new ArrayList<>();
+        public ArrayList<Integer> lastPlacementList;
+        public String gameState;
+        public float timeUntilNextGameState;
+        public HashMap<String, codeowlcove.codeowl_twitchplays_backend.AnimalRacing.AnimalRaceBets.Bet> placedBets;
+
+        public AnimalRaceInformation(List<Animal> animals, ArrayList<Integer> lastPlacementList, String gameState,
+                                     float timeUntilNextGameState, AnimalRaceBets animalRaceBets){
+            this.animals = animals;
+            this.lastPlacementList = lastPlacementList;
+            this.gameState = gameState;
+            this.timeUntilNextGameState = timeUntilNextGameState;
+            this.placedBets = animalRaceBets.getBets();
+        }
+    }
+
+
     private static final Logger logger = LoggerFactory.getLogger(AnimalRaceHandler.class);
 
     private AnimalRaceBets animalRaceBets;
@@ -54,6 +75,8 @@ public class AnimalRaceHandler {
         }
     };
 
+    // -- Constructor --
+
     public AnimalRaceHandler(AnimalRaceBets animalRaceBets){
         this.animalRaceBets = animalRaceBets;
 
@@ -61,6 +84,12 @@ public class AnimalRaceHandler {
 
         timeUntilNextGameState = betTime;
         executorService.scheduleAtFixedRate(handleGameloop, 0, (long) gameLoopTickTime, TimeUnit.MILLISECONDS);
+    }
+
+    // -- Getter and Setters --
+
+    public float getTickTime(){
+        return gameLoopTickTime;
     }
 
     private void HandleRaceTick(){
@@ -178,6 +207,17 @@ public class AnimalRaceHandler {
             winners[i] = animals.get(lastPlacementList.get(i)).getName();
         }
         return winners;
+    }
+
+    public String GetAnimalRaceInformation(){
+        var raceInformation = new AnimalRaceInformation(animals, lastPlacementList, currentGameState.toString(), timeUntilNextGameState, animalRaceBets);
+        var objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(raceInformation);
+        }catch (Exception e){
+            logger.error("Error while converting  to JSON: " + e.getMessage());
+            return null;
+        }
     }
 
 }
