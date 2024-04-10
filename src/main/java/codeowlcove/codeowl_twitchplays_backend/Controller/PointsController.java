@@ -4,10 +4,14 @@ import codeowlcove.codeowl_twitchplays_backend.AnimalRacing.AnimalRaceBets;
 import codeowlcove.codeowl_twitchplays_backend.Database.DatabaseHandler;
 import codeowlcove.codeowl_twitchplays_backend.Database.SQLDatabaseHandler;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/Points")
+@CrossOrigin(origins = "https://codeowlcove.com")
 public class PointsController {
 
     private DatabaseHandler databaseHandler;
